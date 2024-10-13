@@ -17,6 +17,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from admin_data_views.typing import TableContext, ItemContext
 from admin_data_views.utils import render_with_table_view, render_with_item_view, ItemLink
@@ -46,7 +47,10 @@ class HomepageView(View):
         if SERVER_CONFIG.PUBLIC_INDEX:
             return redirect('/public')
 
-        return redirect(f'/admin/login/?next={request.path}')
+        next_url = request.path
+        if not url_has_allowed_host_and_scheme(next_url, allowed_hosts=None):
+            next_url = '/'
+        return redirect(f'/admin/login/?next={next_url}')
 
 
 class SnapshotView(View):
